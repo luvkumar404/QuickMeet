@@ -1,4 +1,4 @@
-# Zoom Clone
+# QuickMeet
 
 This project is a full-stack web application that replicates the core functionalities of a video conferencing platform like Zoom. It includes features for user authentication, creating and joining video meetings, and real-time communication.
 
