@@ -1,111 +1,114 @@
 # QuickMeet
 
-This project is a full-stack web application that replicates the core functionalities of a video conferencing platform like Zoom. It includes features for user authentication, creating and joining video meetings, and real-time communication.
+QuickMeet is a browser-based video meeting application with account authentication, meeting history, WebRTC audio/video, screen sharing, room chat, and Socket.IO signaling.
 
-## Features
+## Stack
 
-*   **User Authentication:** Secure user registration and login system.
-*   **Video Conferencing:** Create and join video meetings with real-time audio and video streaming.
-*   **Meeting History:** View a history of past meetings.
-*   **Real-time Interaction:** Utilizes WebSockets for seamless real-time communication between participants.
+- Frontend: React 19, Vite, React Router, Axios, Tailwind CSS, Socket.IO Client
+- Backend: Node.js, Express, MongoDB/Mongoose, JWT, bcrypt, Socket.IO
 
-## Tech Stack
+## Requirements
 
-### Frontend
+- Node.js 20.19+ or 22.12+
+- npm
+- MongoDB running locally, or a MongoDB Atlas connection string
+- A modern browser with camera and microphone access
 
-*   **React.js:** A JavaScript library for building user interfaces.
-*   **Material-UI (MUI):** A popular React UI framework for faster and easier web development.
-*   **React Router:** For declarative routing in the React application.
-*   **Socket.IO Client:** For real-time, bidirectional event-based communication.
-*   **Axios:** A promise-based HTTP client for the browser and Node.js.
+## Backend Setup
 
-### Backend
+```powershell
+cd backend
+npm install
+cp .env.example .env
+```
 
-*   **Node.js:** A JavaScript runtime built on Chrome's V8 JavaScript engine.
-*   **Express.js:** A minimal and flexible Node.js web application framework.
-*   **MongoDB:** A cross-platform document-oriented database program.
-*   **Mongoose:** An ODM (Object Data Modeling) library for MongoDB and Node.js.
-*   **Socket.IO:** Enables real-time, bidirectional and event-based communication.
-*   **bcrypt:** A library for hashing passwords.
-*   **dotenv:** A zero-dependency module that loads environment variables from a `.env` file.
+Update `backend/.env`:
 
-## Project Structure
+```env
+PORT=8000
+NODE_ENV=development
+MONGODB_URI=mongodb://127.0.0.1:27017/quickmeet
+JWT_SECRET=replace-with-a-random-secret-at-least-32-characters-long
+JWT_EXPIRES_IN=7d
+CORS_ORIGIN=http://localhost:5173
+```
 
-The project is organized into two main directories:
+For multiple frontend origins, separate values with commas. Never commit the real `.env` file.
 
--   `frontend/`: Contains the React.js client-side application.
--   `backend/`: Contains the Node.js and Express.js server-side application.
+Start the API:
 
-## Getting Started
+```powershell
+npm run dev
+```
 
-### Prerequisites
+The API and Socket.IO server run at `http://localhost:8000`.
 
-*   Node.js (v14 or later)
-*   npm
-*   MongoDB (Make sure your MongoDB server is running)
+## Frontend Setup
 
-### Backend Setup
+Open a second terminal:
 
-1.  **Navigate to the backend directory:**
-    ```bash
-    cd backend
-    ```
+```powershell
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+The Vite app runs at `http://localhost:5173`. Set `VITE_API_URL` in `frontend/.env` when the backend uses another URL.
 
-3.  **Create a `.env` file** in the `backend` root directory and add the following environment variables:
-    ```env
-    PORT=8000
-    MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
-    CORS_ORIGIN=http://localhost:3000
-    ```
+## API
 
-4.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-    The backend server will start on `http://localhost:8000`.
+All responses use:
 
-### Frontend Setup
+```json
+{
+  "success": true,
+  "message": "Human-readable result",
+  "data": {}
+}
+```
 
-1.  **Navigate to the frontend directory:**
-    ```bash
-    cd frontend
-    ```
+Protected endpoints require:
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+```text
+Authorization: Bearer <JWT>
+```
 
-3.  **Run the development server:**
-    ```bash
-    npm start
-    ```
-    The frontend application will open in your browser at `http://localhost:3000`.
+| Method | Route | Authentication | Body |
+| --- | --- | --- | --- |
+| GET | `/api/v1/health` | No | - |
+| POST | `/api/v1/users/register` | No | `{ "name", "username", "password" }` |
+| POST | `/api/v1/users/login` | No | `{ "username", "password" }` |
+| GET | `/api/v1/users/me` | Bearer JWT | - |
+| POST | `/api/v1/users/add_to_activity` | Bearer JWT | `{ "meetingCode" }` |
+| GET | `/api/v1/users/get_all_activity` | Bearer JWT | - |
 
-## Available Scripts
+For Postman or Thunder Client, register a user, log in, copy `data.token`, and use the Bearer Token authorization type for protected requests.
 
-### Backend
+## Scripts
 
--   `npm run dev`: Starts the backend server in development mode with `nodemon`.
--   `npm start`: Starts the backend server.
--   `npm run prod`: Starts the backend server using `pm2` for production.
+Backend:
 
-### Frontend
+```powershell
+npm run dev
+npm start
+npm test
+npm run check
+```
 
--   `npm start`: Runs the app in development mode.
--   `npm test`: Launches the test runner in interactive watch mode.
--   `npm run build`: Builds the app for production to the `build` folder.
--   `npm run eject`: Removes the single dependency configuration.
+Frontend:
 
-## Author
+```powershell
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
 
--   Love Kumar Chaudhary
+## Production Notes
 
-## License
-
-This project is licensed under the Love Kumar Chaudhary.
+- Use HTTPS for deployed WebRTC camera and microphone access.
+- Set `CORS_ORIGIN` to the deployed frontend URL.
+- Set `VITE_API_URL` before running `npm run build`.
+- Use a strong, unique `JWT_SECRET`.
+- A STUN server is configured for peer discovery. Reliable calls across restrictive networks require a TURN server.

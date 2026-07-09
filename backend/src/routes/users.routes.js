@@ -1,11 +1,19 @@
 import { Router } from "express";
-import { addToHistory, getUserHistory, login, register } from "../controllers/user.controller.js";
+import {
+    addToHistory,
+    getCurrentUser,
+    getUserHistory,
+    login,
+    register
+} from "../controllers/user.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.route("/login").post(login)
-router.route("/register").post(register)
-router.route("/add_to_activity").post(addToHistory)
-router.route("/get_all_activity").get(getUserHistory)
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", authenticate, getCurrentUser);
+router.post("/add_to_activity", authenticate, addToHistory);
+router.get("/get_all_activity", authenticate, getUserHistory);
 
 export default router;
